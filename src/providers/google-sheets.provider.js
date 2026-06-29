@@ -10,16 +10,27 @@ class GoogleSheetsProvider {
   async authenticate() {
     if (this.auth) return this.auth;
 
-    // Check if credentials.json exists before attempting to load
-    if (!fs.existsSync(env.googleSheets.credentialsPath)) {
-      throw new Error(`Google Service Account Credentials not found at ${env.googleSheets.credentialsPath}. Please add your credentials.json file.`);
+    const authOptions = {
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    };
+
+    if (process.env.GOOGLE_CREDS_JSON) {
+      try {
+        authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDS_JSON);
+      } catch (err) {
+        throw new Error(`Failed to parse GOOGLE_CREDS_JSON environment variable: ${err.message}`);
+      }
+    } else {
+      // Check if credentials.json exists before attempting to load
+      if (!fs.existsSync(env.googleSheets.credentialsPath)) {
+        throw new Error(
+          `Google Service Account Credentials not found. Please place credentials.json at ${env.googleSheets.credentialsPath} or set the GOOGLE_CREDS_JSON environment variable in production.`
+        );
+      }
+      authOptions.keyFile = env.googleSheets.credentialsPath;
     }
 
-    this.auth = new google.auth.GoogleAuth({
-      keyFile: env.googleSheets.credentialsPath,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    });
-
+    this.auth = new google.auth.GoogleAuth(authOptions);
     return this.auth;
   }
 

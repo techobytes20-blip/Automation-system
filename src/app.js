@@ -16,7 +16,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../config/swagger');
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
@@ -24,8 +26,37 @@ app.use(morgan('dev'));
 // Swagger Docs Route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Redirect root to api docs
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
+
 // Routes
 const router = express.Router();
+
+// Base Router Welcome/Status
+router.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Welcome to the Attendance Management System API v1',
+    docs: '/api-docs',
+    status: 'healthy'
+  });
+});
+
+// Health Check Route
+router.get('/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date(),
+    uptime: process.uptime(),
+    services: {
+      database: dbStatus,
+      api: 'online'
+    }
+  });
+});
 
 // Auth Routes
 router.post('/auth/send-otp', authController.sendOtp);

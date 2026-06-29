@@ -1,6 +1,7 @@
 const sheetSyncService = require('../services/sheet-sync.service');
 const googleSheetsProvider = require('../providers/google-sheets.provider');
 const eventRepository = require('../repositories/event.repository');
+const registrationRepository = require('../repositories/registration.repository');
 
 class SyncController {
   /**
@@ -59,16 +60,11 @@ class SyncController {
       }
 
       // Fetch the last registration for testing/verification purposes
-      const Registration = require('../models/registration.model');
       const query = targetEventId ? { eventId: targetEventId } : {};
-      const testReg = await Registration.findOne(query).sort({ createdAt: -1 });
+      const testReg = await registrationRepository.findLatest(query);
 
       // Fetch the synced registrations to send back to the frontend builder
-      const registrations = await Registration.find(query)
-        .populate('studentId')
-        .populate('eventId')
-        .sort({ createdAt: -1 })
-        .limit(100);
+      const registrations = await registrationRepository.findRecentWithPopulated(query, 100);
 
       const syncedRows = registrations.map(reg => {
         const student = reg.studentId || {};

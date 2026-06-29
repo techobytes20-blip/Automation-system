@@ -82,6 +82,27 @@ class RegistrationRepository {
   async findByStudentEventAndTopic(studentId, eventId, topic = '') {
     return await Registration.findOne({ studentId, eventId, topic }).populate('studentId', 'name email phone');
   }
+
+  /**
+   * Finds the latest registration matching a query.
+   * @param {Object} query 
+   */
+  async findLatest(query = {}) {
+    return await Registration.findOne(query).sort({ createdAt: -1 });
+  }
+
+  /**
+   * Finds recent registrations populated with student and event details.
+   * @param {Object} query 
+   * @param {number} limit 
+   */
+  async findRecentWithPopulated(query = {}, limit = 100) {
+    return await Registration.find(query)
+      .populate('studentId')
+      .populate('eventId')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+  }
 }
 
 module.exports = new RegistrationRepository();
