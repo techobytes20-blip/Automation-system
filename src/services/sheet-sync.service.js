@@ -87,6 +87,7 @@ class SheetSyncService {
           name: row.name.trim(),
           email: row.email.trim().toLowerCase(),
           phone: row.phone ? row.phone.trim() : null,
+          topic: row.topic ? row.topic.trim() : '',
           eventId,
           metadata: { ...row } // Dump all extra columns into metadata
         };
@@ -113,6 +114,57 @@ class SheetSyncService {
     }
 
     return { processedCount, errorsCount: errors.length };
+  }
+
+  /**
+   * Fetches all sheet tab names.
+   * @returns {Promise<Array<String>>} Array of sheet titles
+   */
+  async getSheetNames() {
+    return await googleSheetsProvider.fetchSheetNames();
+  }
+
+  /**
+   * Fetches data of a sheet by its tab name.
+   * Parses the first row as headers and maps the subsequent rows to objects.
+   * @param {String} sheetName
+   * @returns {Promise<Object>} Mapped headers and rows
+   */
+  async getSheetDataByName(sheetName) {
+    if (!sheetName) {
+      throw new Error('Sheet name is required');
+    }
+
+    // Fetch raw values including header row (A1:Z1000)
+    const range = `${sheetName}!A1:Z1000`;
+    const rawRows = await googleSheetsProvider.fetchRawValues(range);
+
+    if (rawRows.length === 0) {
+      return { headers: [], rows: [] };
+    }
+
+    // Extract and clean header names (e.g. trim spaces)
+    const headers = rawRows[0].map(header => (header ? header.toString().trim() : ''));
+
+    // Map rows to objects
+    const mappedData = [];
+    for (let i = 1; i < rawRows.length; i++) {
+      const row = rawRows[i];
+      // Skip completely empty rows
+      if (row.length === 0 || row.every(val => !val)) {
+        continue;
+      }
+
+      const rowObj = {};
+      headers.forEach((header, index) => {
+        if (header) {
+          rowObj[header] = row[index] !== undefined ? row[index].toString().trim() : '';
+        }
+      });
+      mappedData.push(rowObj);
+    }
+
+    return { headers, rows: mappedData };
   }
 }
 

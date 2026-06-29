@@ -16,7 +16,9 @@ class RegistrationRepository {
   }
 
   async findByToken(token) {
-    return await Registration.findOne({ token }).populate('studentId', 'name email phone');
+    return await Registration.findOne({ token })
+      .populate('studentId', 'name email phone metadata')
+      .populate('eventId', 'title');
   }
 
   /**
@@ -49,7 +51,9 @@ class RegistrationRepository {
 
     const options = { new: true };
 
-    const updatedDoc = await Registration.findOneAndUpdate(query, update, options).populate('studentId', 'name email');
+    const updatedDoc = await Registration.findOneAndUpdate(query, update, options)
+      .populate('studentId', 'name email phone metadata')
+      .populate('eventId', 'title');
     
     // If we successfully updated Day 1 or Day 2, we need to check eligibility
     // Note: To remain purely atomic on the document level without multi-document transactions, 
@@ -70,12 +74,13 @@ class RegistrationRepository {
   }
 
   /**
-   * Finds a registration by student ID and event ID.
+   * Finds a registration by student ID, event ID, and topic.
    * @param {string} studentId 
    * @param {string} eventId 
+   * @param {string} topic 
    */
-  async findByStudentAndEvent(studentId, eventId) {
-    return await Registration.findOne({ studentId, eventId }).populate('studentId', 'name email phone');
+  async findByStudentEventAndTopic(studentId, eventId, topic = '') {
+    return await Registration.findOne({ studentId, eventId, topic }).populate('studentId', 'name email phone');
   }
 }
 

@@ -20,9 +20,10 @@ class RegistrationService {
     };
     
     const student = await studentRepository.upsertStudentByEmail(studentData);
+    const topic = rowData.topic || '';
 
-    // 2. Check for existing registration
-    let registration = await registrationRepository.findByStudentAndEvent(student._id, rowData.eventId);
+    // 2. Check for existing registration (same student + event + topic)
+    let registration = await registrationRepository.findByStudentEventAndTopic(student._id, rowData.eventId, topic);
 
     if (registration) {
       let updated = false;
@@ -41,10 +42,11 @@ class RegistrationService {
     const token = qrService.generateSecureToken();
     const qrCodeUrl = qrService.generateQRUrl(token);
 
-    // 4. Register student atomically
+    // 4. Register student atomically (unique per student + event + topic)
     const registrationData = {
       studentId: student._id,
       eventId: rowData.eventId,
+      topic,
       token,
       qrCodeUrl
     };

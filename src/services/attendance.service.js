@@ -54,6 +54,7 @@ class AttendanceService {
     return { 
       success: true, 
       student: updatedDoc.studentId, 
+      workshop: updatedDoc.eventId?.title || 'N/A',
       checkpoint,
       eligible: updatedDoc.certificateEligible 
     };

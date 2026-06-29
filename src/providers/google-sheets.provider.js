@@ -44,12 +44,12 @@ class GoogleSheetsProvider {
       }
 
       // Map raw array rows into objects based on user's column order
-      // Assuming columns are: Name, Email, Phone, Workshop
+      // Columns are: Name, Email, Phone, Topic
       return rows.map((row) => ({
         name: row[0] || '',
         email: row[1] || '',
         phone: row[2] || '',
-        workshop: row[3] || ''
+        topic: row[3] || ''
       }));
 
     } catch (error) {
@@ -79,6 +79,27 @@ class GoogleSheetsProvider {
       return sheetsList.map(s => s.properties.title);
     } catch (error) {
       console.error('[GoogleSheetsProvider] Error fetching sheet names:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch raw values from the configured Google Spreadsheet.
+   * @param {String} range e.g., 'Sheet1!A1:Z1000'
+   */
+  async fetchRawValues(range) {
+    const authClient = await this.authenticate();
+    const sheets = google.sheets({ version: 'v4', auth: authClient });
+
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: env.googleSheets.spreadsheetId,
+        range: range,
+      });
+
+      return response.data.values || [];
+    } catch (error) {
+      console.error('[GoogleSheetsProvider] Error fetching raw values:', error.message);
       throw error;
     }
   }

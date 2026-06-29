@@ -36,6 +36,8 @@ router.post('/attendance/scan', authenticate, attendanceController.scan);
 
 // Sync Routes (Protected - assuming only admins can trigger sync)
 router.post('/sync/sheet', authenticate, syncController.triggerSync);
+router.get('/sync/sheets', authenticate, syncController.getSheets);
+router.get('/sync/sheets/:sheetName', authenticate, syncController.getSheetData);
 
 // Mount API v1
 app.use('/api/v1', router);

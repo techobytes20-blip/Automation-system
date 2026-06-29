@@ -11,6 +11,11 @@ const registrationSchema = new mongoose.Schema({
     ref: 'Event',
     required: true
   },
+  topic: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   token: {
     type: String,
     required: true,
@@ -45,8 +50,8 @@ const registrationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Prevent duplicate registrations for the same event
-registrationSchema.index({ studentId: 1, eventId: 1 }, { unique: true });
+// Prevent duplicate registrations for the same event + topic combination
+registrationSchema.index({ studentId: 1, eventId: 1, topic: 1 }, { unique: true });
 
 // Optimize reporting and scanner lookup
 registrationSchema.index({ 'day1.scannedAt': 1 });

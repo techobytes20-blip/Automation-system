@@ -8,6 +8,13 @@ class MailService {
    */
   async sendThankYouMail(registrationDoc) {
     try {
+      // Validate that studentId is populated (not just an ObjectId reference)
+      if (!registrationDoc.studentId || typeof registrationDoc.studentId === 'string' || !registrationDoc.studentId.email) {
+        console.error('[MAIL SERVICE] studentId is not populated on the registration document. Cannot send email.');
+        console.error('[MAIL SERVICE] studentId value:', registrationDoc.studentId);
+        return;
+      }
+
       const studentEmail = registrationDoc.studentId.email;
       const studentName = registrationDoc.studentId.name;
       
@@ -33,7 +40,8 @@ class MailService {
       await registrationRepository.markThankYouMailSent(registrationDoc._id);
       
     } catch (error) {
-      console.error(`[MAIL SERVICE] Failed to send email to ${registrationDoc.studentId?.email}:`, error);
+      console.error(`[MAIL SERVICE] Failed to send email to ${registrationDoc.studentId?.email}:`, error.message);
+      throw error;
     }
   }
 
@@ -64,7 +72,8 @@ class MailService {
       
       console.log(`[MAIL SERVICE] OTP Mail successfully sent to: ${email}`);
     } catch (error) {
-      console.error(`[MAIL SERVICE] Failed to send OTP email to ${email}:`, error);
+      console.error(`[MAIL SERVICE] Failed to send OTP email to ${email}:`, error.message);
+      throw error;
     }
   }
 }
