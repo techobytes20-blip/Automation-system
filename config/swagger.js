@@ -11,16 +11,8 @@ const options = {
     },
     servers: [
       {
-        url: '/api/v1',
-        description: 'Current Host (Dynamic/Relative)',
-      },
-      {
         url: 'https://automation-system-5lz7.onrender.com/api/v1',
         description: 'Live Production Server (Render)',
-      },
-      {
-        url: `http://localhost:${env.port || 3000}/api/v1`,
-        description: 'Local Development Server',
       },
     ],
     components: {

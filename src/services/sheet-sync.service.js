@@ -2,6 +2,7 @@ const syncLogRepository = require('../repositories/sync-log.repository');
 const registrationService = require('./registration.service');
 const googleSheetsProvider = require('../providers/google-sheets.provider');
 const eventRepository = require('../repositories/event.repository');
+const registrationRepository = require('../repositories/registration.repository');
 
 class SheetSyncService {
   /**
@@ -162,6 +163,35 @@ class SheetSyncService {
         }
       });
       mappedData.push(rowObj);
+    }
+
+    // Enrich with actual QR Tokens from Database
+    try {
+      const event = await eventRepository.findOrCreateEventByTitle(sheetName);
+      const registrations = await registrationRepository.findRecentWithPopulated({ eventId: event._id }, 10000);
+      
+      const tokenMap = {};
+      for (const reg of registrations) {
+        if (reg.studentId && reg.studentId.email) {
+          tokenMap[reg.studentId.email.toLowerCase()] = reg.token;
+        }
+      }
+
+      if (!headers.includes('Generated QR')) {
+        headers.push('Generated QR');
+      }
+
+      for (const rowObj of mappedData) {
+        let emailField = Object.keys(rowObj).find(k => k.toLowerCase() === 'email');
+        if (emailField && rowObj[emailField]) {
+          const email = rowObj[emailField].trim().toLowerCase();
+          if (tokenMap[email]) {
+            rowObj['Generated QR'] = tokenMap[email];
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[SHEET SYNC] Error enriching token data:', err);
     }
 
     return { headers, rows: mappedData };
