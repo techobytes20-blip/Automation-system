@@ -56,7 +56,7 @@ class AttendanceController {
       const result = await attendanceService.scanQR(token, checkpoint, scannerId);
 
       if (!result.success) {
-        return res.status(result.status || 400).json({ error: result.error, scannedAt: result.scannedAt });
+        return res.status(result.status || 400).json({ error: result.error, scannedAt: result.scannedAt, student: result.student, workshop: result.workshop, status: 'duplicate' });
       }
 
       return res.status(200).json(result);

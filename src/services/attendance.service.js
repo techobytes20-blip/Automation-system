@@ -41,6 +41,8 @@ class AttendanceService {
         success: false, 
         error: `Participant already scanned for checkpoint: ${checkpoint}`, 
         scannedAt: exists[checkpoint]?.scannedAt,
+        student: exists.studentId,
+        workshop: exists.eventId?.title || 'N/A',
         status: 409 
       };
     }
