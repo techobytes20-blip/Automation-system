@@ -12,14 +12,24 @@ const { errorHandler } = require('./middleware/error-handler');
 
 const app = express();
 
+// Trust reverse proxy (e.g., Render, Heroku, Nginx) for correct IP and protocol
+app.set('trust proxy', 1);
+
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('../config/swagger');
 
 // Middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }
+// CORS must be before Helmet and other middlewares to handle preflight correctly
+app.use(cors({
+  origin: true, // Reflects the request origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+  credentials: true
 }));
-app.use(cors());
+
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Disable to prevent conflicts with CORS
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 
