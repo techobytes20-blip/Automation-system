@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const env = require('../../config/env');
 const adminRepository = require('../repositories/admin.repository');
 const mailService = require('./mail.service');
@@ -21,8 +22,8 @@ class AuthService {
       throw err;
     }
 
-    // Generate a secure 6-digit OTP (e.g., between 100000 and 999999)
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate a secure 6-digit OTP (between 100000 and 999999)
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry
 
     // Save OTP to DB
@@ -31,7 +32,7 @@ class AuthService {
     // Send OTP email (async, but await here to ensure success before response)
     await mailService.sendOtpMail(email, otp);
 
-    return { message: 'OTP sent successfully', otp };
+    return { message: 'OTP sent successfully' };
   }
 
   /**

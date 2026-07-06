@@ -43,6 +43,7 @@ class AttendanceService {
         scannedAt: exists[checkpoint]?.scannedAt,
         student: exists.studentId,
         workshop: exists.eventId?.title || 'N/A',
+        topic: exists.topic || exists.studentId?.metadata?.topic || exists.studentId?.metadata?.Topic || '',
         status: 409 
       };
     }
@@ -57,6 +58,7 @@ class AttendanceService {
       success: true, 
       student: updatedDoc.studentId, 
       workshop: updatedDoc.eventId?.title || 'N/A',
+      topic: updatedDoc.topic || updatedDoc.studentId?.metadata?.topic || updatedDoc.studentId?.metadata?.Topic || '',
       checkpoint,
       eligible: updatedDoc.certificateEligible 
     };

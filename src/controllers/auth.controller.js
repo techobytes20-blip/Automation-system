@@ -27,8 +27,6 @@ class AuthController {
    *               properties:
    *                 message:
    *                   type: string
-   *                 otp:
-   *                   type: string
    *       400:
    *         description: Email is required
    *       404:

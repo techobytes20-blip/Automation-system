@@ -11,6 +11,10 @@ const options = {
     },
     servers: [
       {
+        url: 'http://localhost:3000/api/v1',
+        description: 'Local Development Server',
+      },
+      {
         url: 'https://automation-system-5lz7.onrender.com/api/v1',
         description: 'Live Production Server (Render)',
       },
