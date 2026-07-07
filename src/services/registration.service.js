@@ -1,6 +1,7 @@
 const studentRepository = require('../repositories/student.repository');
 const registrationRepository = require('../repositories/registration.repository');
 const qrService = require('./qr.service');
+const mailService = require('./mail.service');
 
 class RegistrationService {
   /**
@@ -52,6 +53,15 @@ class RegistrationService {
     };
 
     registration = await registrationRepository.createRegistration(registrationData);
+    
+    if (registration) {
+      // Populate studentId and eventId for email formatting
+      await registration.populate(['studentId', 'eventId']);
+      // Trigger confirmation email asynchronously (fire & forget)
+      mailService.sendConfirmationMail(registration).catch(err => {
+        console.error('[REGISTRATION SERVICE] Failed to trigger confirmation mail:', err.message);
+      });
+    }
     
     return { status: 'registered', registration };
   }

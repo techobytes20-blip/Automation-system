@@ -72,6 +72,10 @@ class RegistrationRepository {
   async markThankYouMailSent(registrationId) {
     return await Registration.findByIdAndUpdate(registrationId, { thankYouMailSent: true });
   }
+  
+  async markConfirmationMailSent(registrationId) {
+    return await Registration.findByIdAndUpdate(registrationId, { confirmationMailSent: true });
+  }
 
   /**
    * Finds a registration by student ID, event ID, and topic.

@@ -45,6 +45,10 @@ const registrationSchema = new mongoose.Schema({
   thankYouMailSent: {
     type: Boolean,
     default: false
+  },
+  confirmationMailSent: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

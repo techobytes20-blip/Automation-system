@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const sheetSyncService = require('../services/sheet-sync.service');
+const mailService = require('../services/mail.service');
 
 const initSheetSyncCron = () => {
   // Run every 2 minutes by default, or use custom cron schedule from environment variables
@@ -12,6 +13,10 @@ const initSheetSyncCron = () => {
     try {
       const result = await sheetSyncService.syncAllSheets();
       console.log('[CRON] Automatic sheets synchronization completed:', JSON.stringify(result));
+      
+      // Automatically send thank-you emails for any completed registrations
+      console.log('[CRON] Checking and sending pending thank you emails...');
+      await mailService.sendPendingThankYouMails();
     } catch (error) {
       console.error('[CRON] Error during background Sheet Sync:', error.message);
     }
